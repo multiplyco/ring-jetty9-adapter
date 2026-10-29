@@ -1,7 +1,6 @@
 (ns build
   (:require [clojure.tools.build.api :as b]))
 
-
 (defn compile-handlers
   "Compile the two generated Jetty handler classes needed by source dependencies."
   [_]

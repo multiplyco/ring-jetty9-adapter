@@ -10,13 +10,11 @@
            [org.eclipse.jetty.server Server ServerConnector]
            [org.eclipse.jetty.websocket.api Callback Session$Listener]))
 
-
 (defn- buffer-bytes
   [buffer]
   (let [bytes (byte-array (ByteBuffer/.remaining buffer))]
     (ByteBuffer/.get (ByteBuffer/.duplicate buffer) bytes)
     (vec bytes)))
-
 
 (deftype MessageListener [receive]
   ws/Listener
@@ -26,7 +24,6 @@
   (on-error [_ _socket _error])
   (on-close [_ _socket _code _reason]))
 
-
 (deftype ReceiveCallback [events recycle]
   Callback
   (succeed [_]
@@ -34,7 +31,6 @@
     (recycle))
   (fail [_ error]
     (swap! events conj [:fail error])))
-
 
 (deftest binary-callback-completes-and-retained-payload-is-owned
   (doseq [direct [false true]]
@@ -61,7 +57,6 @@
           (is (= 1 (ByteBuffer/.position payload)))
           (is (= 4 (ByteBuffer/.limit payload))))))))
 
-
 (deftest empty-binary-message-completes
   (let [events (atom [])
         received (atom nil)
@@ -72,7 +67,6 @@
     (is (= [] @received))
     (is (= [:succeed] @events))))
 
-
 (deftest listener-failure-completes-the-callback-once
   (doseq [error [(ex-info "Listener failed" {}) (AssertionError. "Listener failed")]]
     (let [events (atom [])
@@ -82,7 +76,6 @@
                                            (ReceiveCallback. events (constantly nil)))
       (is (= [[:fail error]] @events)))))
 
-
 (deftest completion-failure-does-not-complete-the-callback-twice
   (let [events (atom [])
         error (ex-info "Callback failed" {})
@@ -91,7 +84,6 @@
                  (Session$Listener/.onWebSocketBinary endpoint (ByteBuffer/allocate 0)
                                                       (ReceiveCallback. events #(throw error)))))
     (is (= [:succeed] @events))))
-
 
 (deftype ClientListener [received fragments]
   WebSocket$Listener
@@ -108,7 +100,6 @@
     (WebSocket/.request socket 1)
     (CompletableFuture/completedFuture nil))
   (onError [_ _socket error] (LinkedBlockingQueue/.offer received error)))
-
 
 (deftest repeated-and-fragmented-binary-roundtrips
   (doseq [async [false true]]
